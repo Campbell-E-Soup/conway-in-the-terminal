@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -81,7 +82,39 @@ public class Main {
         }
     }
 
-    public static void updateGameSpace(int[][] gameSpace) {
-        int[][] newSpace = new int[gameSpace.length][gameSpace[0].length];
+    public static int[][] updateGameSpace(int[][] gameSpace, int[] survive, int[] birth) {
+        int width = gameSpace[0].length;
+        int height = gameSpace.length;
+        int[][] newSpace = new int[height][width];
+        //does the things
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int neighbors = 0;
+                for (int xx = x-1; xx < x+1; xx++) {
+                    for (int yy = y-1; yy < y+1; yy++) {
+                        //check if coords are out of range
+                        if (xx < 0 || xx > width || yy < 0 || yy > height || (xx == x && yy == y)) continue;
+                        if (gameSpace[yy][xx] == 1) {
+                            neighbors++;
+                        }
+                    }
+                }
+                //now we have the number of neighbors
+                if (gameSpace[y][x] == 0) {
+                    //check for birth
+                    int finalNeighbors = neighbors;
+                    if (Arrays.stream(birth).anyMatch(num -> num == finalNeighbors)) {
+                        newSpace[y][x] = 1;
+                    }
+                }
+                else {
+                    int finalNeighbors = neighbors;
+                    if (Arrays.stream(survive).anyMatch(num -> num != finalNeighbors)) {
+                        newSpace[y][x] = 0;
+                    }
+                }
+            }
+        }
+        return newSpace;
     }
 }
