@@ -12,6 +12,8 @@ public class Main {
         //init vars
             Scanner in = new Scanner(System.in);
             Random rand = new Random();
+            int[] surviveRules = {2,3};
+            int[] birthRules = {3};
         //ask for vars
 
             int width = getValidInt(in,"Enter a width: ");
@@ -36,6 +38,9 @@ public class Main {
 
         String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_GREEN + "▀" + ANSI_RESET};
         int[][] gameSpace = new int[height][width];
+
+        width = gameSpace[0].length;
+        height = gameSpace.length;
         int confirm = 0;
         while (confirm != 1) {
             clearScreen();
@@ -51,7 +56,20 @@ public class Main {
         }
         //ask for vars.
         int generations = getValidInt(in,"How many generations do you want to play? ");
-        int gps = getValidInt(in,"How many generations to display per second (recommended 3): ");
+        int gps = getValidInt(in,"How many generations to display per second (recommended 1): ");
+        if (gps > 10) {
+            System.out.println("Max is 10. Generations per second set to 10.");
+        }
+        else if (gps < 1) {
+            System.out.println("Minimum is 1. Generations per second set to 1.");
+        }
+        long pause = (long)((1.0/gps) * 1000);
+        while (generations > 0) {
+            gameSpace = updateGameSpace(gameSpace, surviveRules, birthRules);
+            drawGameSpace(gameSpace, tileState);
+            timeOut(pause);
+            generations--;
+        }
 
     }
 
@@ -90,10 +108,12 @@ public class Main {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int neighbors = 0;
-                for (int xx = x-1; xx < x+1; xx++) {
-                    for (int yy = y-1; yy < y+1; yy++) {
+                for (int xx = x-1; xx <= x+1; xx++) {
+                    for (int yy = y-1; yy <= y+1; yy++) {
                         //check if coords are out of range
-                        if (xx < 0 || xx > width || yy < 0 || yy > height || (xx == x && yy == y)) continue;
+                        if (xx == x && yy == y) {continue;}
+                        else if (xx < 0 || xx >= width) {continue;}
+                        else if (yy < 0 || yy >= height ) {continue;}
                         if (gameSpace[yy][xx] == 1) {
                             neighbors++;
                         }
@@ -102,19 +122,39 @@ public class Main {
                 //now we have the number of neighbors
                 if (gameSpace[y][x] == 0) {
                     //check for birth
-                    int finalNeighbors = neighbors;
-                    if (Arrays.stream(birth).anyMatch(num -> num == finalNeighbors)) {
+                    if (arrayContains(birth,neighbors)) {
                         newSpace[y][x] = 1;
                     }
                 }
                 else {
-                    int finalNeighbors = neighbors;
-                    if (Arrays.stream(survive).anyMatch(num -> num != finalNeighbors)) {
+                    if (!arrayContains(survive,neighbors)) {
                         newSpace[y][x] = 0;
+                    }
+                    else {
+                        newSpace[y][x] = 1;
                     }
                 }
             }
         }
         return newSpace;
+    }
+    public static void drawGameSpace(int[][] gameSpace, String[] symbols) {
+        int width = gameSpace[0].length;
+        int height = gameSpace.length;
+        clearScreen();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                System.out.print(symbols[gameSpace[y][x]] + " ");
+            }
+            System.out.println();
+        }
+    }
+    public static boolean arrayContains(int[] ary,int contains) {
+        for (int j : ary) {
+            if (j == contains) {
+                return true;
+            }
+        }
+        return false;
     }
 }
