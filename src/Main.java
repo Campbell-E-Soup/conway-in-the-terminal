@@ -4,7 +4,7 @@ import java.util.Random;
 public class Main {
     //macros
         public static final String ANSI_RESET = "\u001B[0m";  // Reset color
-        public static final String ANSI_GREEN = "\u001B[32m"; // Green text
+        public static final String ANSI_GREEN = "\033[38;5;10m"; // Green text
         public static final String ANSI_BLACK = "\u001B[30m"; // Black text
         public static final String ANSI_RED = "\u001B[31m";   // Red Text
         public static final String ANSI_BLUE = "\u001B[34m";  // Blue Text
@@ -15,62 +15,92 @@ public class Main {
             Random rand = new Random();
             int[] surviveRules = {2,3};
             int[] birthRules = {3};
+            int[][] gameSpace;
+            int height = 0;
+            int width = 0;
             String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_BLUE + "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
         //ask for vars
             System.out.println(title);
-            int width = getValidInt(in,"Enter A Width: ");
-            if (width > 80) {
-                System.out.println("Game space size is large, the terminal should be maximized.");
+            timeOut(200);
+            System.out.print(ANSI_COMMENT);
+            for (int i = 0; i < 62; i++) {
+                System.out.print("▒");
+                timeOut(25);
             }
-            int height = getValidInt(in,"Enter A Height: ");
-            if (height > 25) {
-                System.out.println("Game space size is large, the terminal should be maximized");
-                timeOut(1000);
-                System.out.print(". ");
-                timeOut(1000);
-                System.out.print(". ");
-                timeOut(1000);
-                System.out.print(". ");
-                timeOut(1000);
-                if (width >= 100 || height >= 100) {
-                    System.out.println("\nWidth: " + width + "\nHeight: " + height  + "\nGood Luck.");
-                    timeOut(5000);
+            int repeat = 1;
+            while (repeat != 0) {
+                System.out.println(ANSI_COMMENT + "\n\nSELECT PATTERN:\n[0] Randomized Pattern (XxY)\n[1] Simple Glider (13x13)\n[2] 3 Phase Pulsar (15x15)\n[3] Glider Gun (15x38)\n[4] Humble Beginnings (35x35)");
+                System.out.println(ANSI_RESET);
+                int pattern = getValidInt(in, "Pattern: ");
+                boolean randomize = true;
+                if (pattern <= 0 || pattern >= 5) {
+                    width = getValidInt(in, "Enter A Width: ");
+                    if (width > 80) {
+                        System.out.println("Game space size is large, the terminal should be maximized.");
+                    }
+                    height = getValidInt(in, "Enter A Height: ");
+                    if (height > 25) {
+                        System.out.println("Game space size is large, the terminal should be maximized");
+                        timeOut(1000);
+                        System.out.print(". ");
+                        timeOut(1000);
+                        System.out.print(". ");
+                        timeOut(1000);
+                        System.out.print(". ");
+                        timeOut(1000);
+                        if (width >= 100 || height >= 100) {
+                            System.out.println("\nWidth: " + width + "\nHeight: " + height + "\nGood Luck.");
+                            timeOut(5000);
+                        }
+                    }
+                    gameSpace = new int[height][width];
+                } else {
+                    gameSpace = getPreset(pattern);
+                    randomize = false;
                 }
-            }
-        int[][] gameSpace = new int[height][width];
-        //gameSpace = getPreset(1);
-        //width = gameSpace[0].length;
-        //height = gameSpace.length;
-        int confirm = 0;
-        while (confirm != 1) {
-            clearScreen();
-            //randomize game space
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    gameSpace[y][x] = rand.nextInt(2);
-                    System.out.print(tileState[gameSpace[y][x]] + " ");
+                width = gameSpace[0].length;
+                height = gameSpace.length;
+                int confirm = 0;
+                while (confirm != 1) {
+                    clearScreen();
+                    //randomize game space
+                    for (int y = 0; y < height; y++) {
+                        for (int x = 0; x < width; x++) {
+                            if (randomize) {
+                                gameSpace[y][x] = rand.nextInt(2);
+                            }
+                            ;
+                            System.out.print(tileState[gameSpace[y][x]] + " ");
+                        }
+                        System.out.println();
+                    }
+                    if (randomize) {
+                        confirm = getValidInt(in, "\nAre you happy with the starting conditions? [0] - NO, [1] - YES: ");
+                    } else {
+                        confirm = 1;
+                    }
                 }
-                System.out.println();
+                //ask for vars.
+                int doAgain = 1;
+                while (doAgain != 0) {
+                    int generations = getValidInt(in, "How many generations do you want to play? ");
+                    int gps = getValidInt(in, "How many generations to display per second (recommended 1): ");
+                    if (gps > 10) {
+                        System.out.println("Max is 10. Generations per second set to 10.");
+                    } else if (gps < 1) {
+                        System.out.println("Minimum is 1. Generations per second set to 1.");
+                    }
+                    long pause = (long) ((1.0 / gps) * 1000);
+                    while (generations > 0) {
+                        gameSpace = updateGameSpace(gameSpace, surviveRules, birthRules);
+                        drawGameSpace(gameSpace, tileState);
+                        timeOut(pause);
+                        generations--;
+                    }
+                    doAgain = getValidInt(in,"Continue game? [0] - NO, [1] - YES: ");
+                }
+                repeat = getValidInt(in,"Start a new game? [0] - NO, [1] - YES: ");
             }
-            confirm = getValidInt(in,"\nAre you happy with the starting conditions? 0 no, 1 yes: ");
-        }
-        //ask for vars.
-        int generations = getValidInt(in,"How many generations do you want to play? ");
-        int gps = getValidInt(in,"How many generations to display per second (recommended 1): ");
-        if (gps > 10) {
-            System.out.println("Max is 10. Generations per second set to 10.");
-        }
-        else if (gps < 1) {
-            System.out.println("Minimum is 1. Generations per second set to 1.");
-        }
-        long pause = (long)((1.0/gps) * 1000);
-        while (generations > 0) {
-            gameSpace = updateGameSpace(gameSpace, surviveRules, birthRules);
-            drawGameSpace(gameSpace, tileState);
-            timeOut(pause);
-            generations--;
-        }
-
     }
 
     public static int getValidInt(Scanner scan, String message) {
@@ -164,24 +194,126 @@ public class Main {
     public static int[][] getPreset(int id) {
         int[][] gameArray = new int[1][1];
             if (id == 1) {
-                gameArray = new int[][]{
-                        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-                };
+                gameArray = new int[13][13];
+
+                gameArray[0][0] = 1;
+
+                gameArray[1][1] = 1;
+                gameArray[1][2] = 1;
+
+                gameArray[2][0] = 1;
+                gameArray[2][1] = 1;
             }
             else if (id == 2) {
-                gameArray = new int[40][40]; // Create a 40x42 array
+                gameArray = new int[15][15];
+
+                gameArray[1][3] = 1;
+                gameArray[1][4] = 1;
+                gameArray[1][5] = 1;
+                gameArray[1][9] = 1;
+                gameArray[1][10] = 1;
+                gameArray[1][11] = 1;
+
+                gameArray[3][1] = 1;
+                gameArray[3][6] = 1;
+                gameArray[3][8] = 1;
+                gameArray[3][13] = 1;
+
+                gameArray[4][1] = 1;
+                gameArray[4][6] = 1;
+                gameArray[4][8] = 1;
+                gameArray[4][13] = 1;
+
+                gameArray[5][1] = 1;
+                gameArray[5][6] = 1;
+                gameArray[5][8] = 1;
+                gameArray[5][13] = 1;
+
+                gameArray[6][3] = 1;
+                gameArray[6][4] = 1;
+                gameArray[6][5] = 1;
+                gameArray[6][9] = 1;
+                gameArray[6][10] = 1;
+                gameArray[6][11] = 1;
+
+                gameArray[8][3] = 1;
+                gameArray[8][4] = 1;
+                gameArray[8][5] = 1;
+                gameArray[8][9] = 1;
+                gameArray[8][10] = 1;
+                gameArray[8][11] = 1;
+
+                gameArray[9][1] = 1;
+                gameArray[9][6] = 1;
+                gameArray[9][8] = 1;
+                gameArray[9][13] = 1;
+
+                gameArray[10][1] = 1;
+                gameArray[10][6] = 1;
+                gameArray[10][8] = 1;
+                gameArray[10][13] = 1;
+
+                gameArray[11][1] = 1;
+                gameArray[11][6] = 1;
+                gameArray[11][8] = 1;
+                gameArray[11][13] = 1;
+
+                gameArray[13][3] = 1;
+                gameArray[13][4] = 1;
+                gameArray[13][5] = 1;
+                gameArray[13][9] = 1;
+                gameArray[13][10] = 1;
+                gameArray[13][11] = 1;
+            }
+            else if (id == 3) {
+                gameArray = new int[15][38];
+                gameArray[1][25] = 1;
+
+                gameArray[2][23] = 1;
+                gameArray[2][25] = 1;
+
+                gameArray[3][13] = 1;
+                gameArray[3][14] = 1;
+                gameArray[3][21] = 1;
+                gameArray[3][22] = 1;
+                gameArray[3][35] = 1;
+                gameArray[3][36] = 1;
+
+                gameArray[4][12] = 1;
+                gameArray[4][16] = 1;
+                gameArray[4][21] = 1;
+                gameArray[4][22] = 1;
+                gameArray[4][35] = 1;
+                gameArray[4][36] = 1;
+
+                gameArray[5][1] = 1;
+                gameArray[5][2] = 1;
+                gameArray[5][11] = 1;
+                gameArray[5][17] = 1;
+                gameArray[5][21] = 1;
+                gameArray[5][22] = 1;
+
+                gameArray[6][1] = 1;
+                gameArray[6][2] = 1;
+                gameArray[6][11] = 1;
+                gameArray[6][15] = 1;
+                gameArray[6][17] = 1;
+                gameArray[6][18] = 1;
+                gameArray[6][23] = 1;
+                gameArray[6][25] = 1;
+
+                gameArray[7][11] = 1;
+                gameArray[7][17] = 1;
+                gameArray[7][25] = 1;
+
+                gameArray[8][12] = 1;
+                gameArray[8][16] = 1;
+
+                gameArray[9][13] = 1;
+                gameArray[9][14] = 1;
+            }
+            else if (id == 4) {
+                gameArray = new int[35][35]; // Create a 40x42 array
 
                 // Fill the array with the specified pattern
                     gameArray[12][8] = 0;
@@ -214,7 +346,7 @@ public class Main {
             "██║     ██║   ██║██║╚██╗██║██║███╗██║██╔══██║  ╚██╔╝  ╚════██║\n" +
             "╚██████╗╚██████╔╝██║ ╚████║╚███╔███╔╝██║  ██║   ██║   ███████║\n" +
             " ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝\n" + ANSI_RED +
-            " G A M E    O F    L I F E    I N    T H E    T E R M I N A L\n" + ANSI_RESET;
+            " G A M E    O F    L I F E    I N    T H E    T E R M I N A L " + ANSI_RESET;
     public static int gens = 0;
     public static int deaths = 0;
     public static int births = 0;
