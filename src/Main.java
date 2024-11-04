@@ -8,9 +8,12 @@ public class Main {
         public static final String ANSI_BLACK = "\u001B[30m"; // Black text
         public static final String ANSI_RED = "\u001B[31m";   // Red Text
         public static final String ANSI_BLUE = "\u001B[34m";  // Blue Text
-        public static final  String ANSI_COMMENT = "\u001B[38;5;75m";
+        public static final String ANSI_YELLOW = "\033[93m";  // Blue Text
+        public static final String ANSI_ORANGE = "\033[38;5;214m";  // Blue Text
+        public static final String ANSI_COMMENT = "\u001B[38;5;75m";
     public static void main(String[] args) {
         //init vars
+            clearScreen();
             Scanner in = new Scanner(System.in);
             Random rand = new Random();
             int[] surviveRules = {2,3};
@@ -24,11 +27,14 @@ public class Main {
             timeOut(200);
             System.out.print(ANSI_COMMENT);
             for (int i = 0; i < 62; i++) {
-                System.out.print("▒");
+                System.out.print("█");
                 timeOut(25);
             }
             int repeat = 1;
             while (repeat != 0) {
+                deaths = 0;
+                births = 0;
+                gens = 0;
                 System.out.println(ANSI_COMMENT + "\n\nSELECT PATTERN:\n[0] Randomized Pattern (XxY)\n[1] Simple Glider (13x13)\n[2] 3 Phase Pulsar (15x15)\n[3] Glider Gun (15x38)\n[4] Humble Beginnings (35x35)");
                 System.out.println(ANSI_RESET);
                 int pattern = getValidInt(in, "Pattern: ");
@@ -40,7 +46,7 @@ public class Main {
                     }
                     height = getValidInt(in, "Enter A Height: ");
                     if (height > 25) {
-                        System.out.println("Game space size is large, the terminal should be maximized");
+                        System.out.print(ANSI_COMMENT + "Game space size is large, the terminal should be maximized ");
                         timeOut(1000);
                         System.out.print(". ");
                         timeOut(1000);
@@ -49,9 +55,10 @@ public class Main {
                         System.out.print(". ");
                         timeOut(1000);
                         if (width >= 100 || height >= 100) {
-                            System.out.println("\nWidth: " + width + "\nHeight: " + height + "\nGood Luck.");
+                            System.out.println(ANSI_RED + "\nWidth: " + width + "\nHeight: " + height + "\nGood Luck.");
                             timeOut(5000);
                         }
+                        System.out.println();
                     }
                     gameSpace = new int[height][width];
                 } else {
@@ -84,14 +91,15 @@ public class Main {
                 int doAgain = 1;
                 while (doAgain != 0) {
                     int generations = getValidInt(in, "How many generations do you want to play? ");
-                    int gps = getValidInt(in, "How many generations to display per second (recommended 1): ");
-                    if (gps > 10) {
-                        System.out.println("Max is 10. Generations per second set to 10.");
+                    int gps = getValidInt(in, "How many generations to display per second (recommended 1 or 2): ");
+                    if (gps > 6) {
+                        System.out.println("Max is 6. Generations per second set to 6.");
                     } else if (gps < 1) {
                         System.out.println("Minimum is 1. Generations per second set to 1.");
                     }
                     long pause = (long) ((1.0 / gps) * 1000);
                     while (generations > 0) {
+                        gens++;
                         gameSpace = updateGameSpace(gameSpace, surviveRules, birthRules);
                         drawGameSpace(gameSpace, tileState);
                         timeOut(pause);
@@ -101,6 +109,9 @@ public class Main {
                 }
                 repeat = getValidInt(in,"Start a new game? [0] - NO, [1] - YES: ");
             }
+        clearScreen();
+        System.out.println(ANSI_RED + "T H A N K  Y O U  F O R  P L A Y I N G :");
+        System.out.println(title);
     }
 
     public static int getValidInt(Scanner scan, String message) {
@@ -163,6 +174,7 @@ public class Main {
                 else {
                     if (!arrayContains(survive,neighbors)) {
                         newSpace[y][x] = 2;
+                        deaths++;
                     }
                     else {
                         newSpace[y][x] = 1;
@@ -182,6 +194,7 @@ public class Main {
             }
             System.out.println();
         }
+        System.out.println(ANSI_YELLOW + "GENERATIONS: " + gens + " | DEATHS: " + deaths + " | BIRTHS: " + births );
     }
     public static boolean arrayContains(int[] ary,int contains) {
         for (int j : ary) {
@@ -339,7 +352,7 @@ public class Main {
         return gameArray;
     }
 
-    public static String title = ANSI_BLUE +
+    public static String title = ANSI_COMMENT +
             " ██████╗ ██████╗ ███╗   ██╗██╗    ██╗ █████╗ ██╗   ██╗███████╗\n" +
             "██╔════╝██╔═══██╗████╗  ██║██║    ██║██╔══██╗╚██╗ ██╔╝██╔════╝\n" +
             "██║     ██║   ██║██╔██╗ ██║██║ █╗ ██║███████║ ╚████╔╝ ███████╗\n" +

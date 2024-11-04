@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="GameofLife:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/GameofLife_jar</output-path>
+  <artifact type="jar" name="GOLITT:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/GOLITT_jar</output-path>
     <root id="archive" name="Game of Life.jar">
       <element id="module-output" name="Game of Life" />
     </root>
