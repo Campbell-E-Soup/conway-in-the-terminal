@@ -1,26 +1,28 @@
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Random;
 
 public class Main {
     //macros
         public static final String ANSI_RESET = "\u001B[0m";  // Reset color
-        public static final String ANSI_GREEN = "\u001B[32m";  // Green text
-        public static final String ANSI_BLACK = "\u001B[30m";
+        public static final String ANSI_GREEN = "\u001B[32m"; // Green text
+        public static final String ANSI_BLACK = "\u001B[30m"; // Black text
+        public static final String ANSI_RED = "\u001B[31m";   // Red Text
+        public static final String ANSI_BLUE = "\u001B[34m";  // Blue Text
+        public static final  String ANSI_COMMENT = "\u001B[38;5;75m";
     public static void main(String[] args) {
-
         //init vars
             Scanner in = new Scanner(System.in);
             Random rand = new Random();
             int[] surviveRules = {2,3};
             int[] birthRules = {3};
+            String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_BLUE + "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
         //ask for vars
-
-            int width = getValidInt(in,"Enter a width: ");
+            System.out.println(title);
+            int width = getValidInt(in,"Enter A Width: ");
             if (width > 80) {
                 System.out.println("Game space size is large, the terminal should be maximized.");
             }
-            int height = getValidInt(in,"Enter a height: ");
+            int height = getValidInt(in,"Enter A Height: ");
             if (height > 25) {
                 System.out.println("Game space size is large, the terminal should be maximized");
                 timeOut(1000);
@@ -35,12 +37,10 @@ public class Main {
                     timeOut(5000);
                 }
             }
-
-        String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_GREEN + "▀" + ANSI_RESET};
         int[][] gameSpace = new int[height][width];
-
-        width = gameSpace[0].length;
-        height = gameSpace.length;
+        //gameSpace = getPreset(1);
+        //width = gameSpace[0].length;
+        //height = gameSpace.length;
         int confirm = 0;
         while (confirm != 1) {
             clearScreen();
@@ -75,12 +75,12 @@ public class Main {
 
     public static int getValidInt(Scanner scan, String message) {
         while (true) {
-            System.out.print(message);
+            System.out.print( ANSI_COMMENT + message + ANSI_RESET);
             if (scan.hasNextInt()) {
                 return scan.nextInt();
             }
             else {
-                System.out.println("Invalid Input, please enter a whole number.");
+                System.out.println( ANSI_RED + "Invalid Input, please enter a whole number." + ANSI_RESET);
                 scan.nextLine();
             }
         }
@@ -96,7 +96,7 @@ public class Main {
         try {
             Thread.sleep(time);
         } catch (Exception ex) {
-            System.out.println("Thread was interrupted: " + ex.getMessage());
+            System.out.println(ANSI_RED + "Thread was interrupted: " + ex.getMessage() + ANSI_RESET);
         }
     }
 
@@ -120,15 +120,19 @@ public class Main {
                     }
                 }
                 //now we have the number of neighbors
-                if (gameSpace[y][x] == 0) {
+                if (gameSpace[y][x] != 1) {
                     //check for birth
                     if (arrayContains(birth,neighbors)) {
                         newSpace[y][x] = 1;
+                        births++;
+                    }
+                    else if (gameSpace[y][x] == 2) {
+                        newSpace[y][x] = 2;
                     }
                 }
                 else {
                     if (!arrayContains(survive,neighbors)) {
-                        newSpace[y][x] = 0;
+                        newSpace[y][x] = 2;
                     }
                     else {
                         newSpace[y][x] = 1;
@@ -157,4 +161,61 @@ public class Main {
         }
         return false;
     }
+    public static int[][] getPreset(int id) {
+        int[][] gameArray = new int[1][1];
+            if (id == 1) {
+                gameArray = new int[][]{
+                        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+                };
+            }
+            else if (id == 2) {
+                gameArray = new int[40][40]; // Create a 40x42 array
+
+                // Fill the array with the specified pattern
+                    gameArray[12][8] = 0;
+                    gameArray[12][9] = 0;
+                    gameArray[12][10] = 1;
+                    gameArray[12][11] = 1;
+
+                    gameArray[13][8] = 0;
+                    gameArray[13][9] = 0;
+                    gameArray[13][10] = 1;
+                    gameArray[13][11] = 1;
+
+                    gameArray[14][8] = 1;
+                    gameArray[14][9] = 1;
+                    gameArray[14][10] = 1;
+                    gameArray[14][11] = 0;
+
+                    gameArray[15][8] = 0;
+                    gameArray[15][9] = 1;
+                    gameArray[15][10] = 0;
+                    gameArray[15][11] = 0;
+            }
+        return gameArray;
+    }
+
+    public static String title = ANSI_BLUE +
+            " ██████╗ ██████╗ ███╗   ██╗██╗    ██╗ █████╗ ██╗   ██╗███████╗\n" +
+            "██╔════╝██╔═══██╗████╗  ██║██║    ██║██╔══██╗╚██╗ ██╔╝██╔════╝\n" +
+            "██║     ██║   ██║██╔██╗ ██║██║ █╗ ██║███████║ ╚████╔╝ ███████╗\n" +
+            "██║     ██║   ██║██║╚██╗██║██║███╗██║██╔══██║  ╚██╔╝  ╚════██║\n" +
+            "╚██████╗╚██████╔╝██║ ╚████║╚███╔███╔╝██║  ██║   ██║   ███████║\n" +
+            " ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝\n" + ANSI_RED +
+            " G A M E    O F    L I F E    I N    T H E    T E R M I N A L\n" + ANSI_RESET;
+    public static int gens = 0;
+    public static int deaths = 0;
+    public static int births = 0;
 }
