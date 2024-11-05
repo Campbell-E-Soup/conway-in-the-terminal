@@ -1,8 +1,9 @@
+import java.util.Dictionary;
 import java.util.Scanner;
 import java.util.Random;
 
 public class Main {
-    //macros
+    //finals
         public static final String ANSI_RESET = "\u001B[0m";  // Reset color
         public static final String ANSI_GREEN = "\033[38;5;10m"; // Green text
         public static final String ANSI_BLACK = "\u001B[30m"; // Black text
@@ -16,16 +17,16 @@ public class Main {
             clearScreen();
             Scanner in = new Scanner(System.in);
             Random rand = new Random();
-            int[] surviveRules = {2,3};
-            int[] birthRules = {3};
+            int[] surviveRules;
+            int[] birthRules;
             int[][] gameSpace;
             int height = 0;
             int width = 0;
-            String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_BLUE + "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
+            String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_GREEN+ "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
         //ask for vars
             System.out.println(title);
             timeOut(200);
-            System.out.print(ANSI_COMMENT);
+            System.out.print(ANSI_BLUE);
             for (int i = 0; i < 62; i++) {
                 System.out.print("█");
                 timeOut(25);
@@ -35,11 +36,16 @@ public class Main {
                 deaths = 0;
                 births = 0;
                 gens = 0;
-                System.out.println(ANSI_COMMENT + "\n\nSELECT PATTERN:\n[0] Randomized Pattern (XxY)\n[1] Simple Glider (13x13)\n[2] 3 Phase Pulsar (15x15)\n[3] Glider Gun (15x38)\n[4] Humble Beginnings (35x35)");
+                System.out.println(ANSI_COMMENT + "\n\nSELECT PATTERN:\n[0] Randomized Pattern (XxY)\n[1] Simple Glider (13x13)\n[2] 3 Phase Pulsar (15x15)\n[3] Glider Gun (15x38)\n[4] Humble Beginnings (35x35)\n[5] The Acorn (40x32)");
+
                 System.out.println(ANSI_RESET);
-                int pattern = getValidInt(in, "Pattern: ");
+                int pattern = getValidInt(in, "PATTERN: ");
+                System.out.println(ANSI_COMMENT + "\nSELECT RULES:\n[0] Conway's Rules (B2 S23)\n[1] Replicator (B1357 S1357)\n[2] Mazectric with Mice (B37 S1234)\n[3] Diamoeba (B45678 S4678)\n");
+                int rule = getValidInt(in, "RULE: ");
+                birthRules = getBirthRules(rule);
+                surviveRules = getSurviveRules(rule);
                 boolean randomize = true;
-                if (pattern <= 0 || pattern >= 5) {
+                if (pattern <= 0 || pattern >= 6) {
                     width = getValidInt(in, "Enter A Width: ");
                     if (width > 80) {
                         System.out.println("Game space size is large, the terminal should be maximized.");
@@ -74,7 +80,16 @@ public class Main {
                     for (int y = 0; y < height; y++) {
                         for (int x = 0; x < width; x++) {
                             if (randomize) {
-                                gameSpace[y][x] = rand.nextInt(2);
+                                if (rule == 1 || rule == 2) {
+                                    int dw = width/4;
+                                    int dh = height/4;
+                                    if (x > dw && x < dw*2 && y > dh && y < dh*2) {
+                                        gameSpace[y][x] = rand.nextInt(2);
+                                    }
+                                }
+                                else {
+                                    gameSpace[y][x] = rand.nextInt(2);
+                                }
                             }
                             ;
                             System.out.print(tileState[gameSpace[y][x]] + " ");
@@ -110,7 +125,7 @@ public class Main {
                 repeat = getValidInt(in,"Start a new game? [0] - NO, [1] - YES: ");
             }
         clearScreen();
-        System.out.println(ANSI_RED + "T H A N K  Y O U  F O R  P L A Y I N G :");
+        System.out.println(ANSI_ORANGE + "\n T  H  A  N  K    Y  O  U    F  O  R    P  L  A  Y  I  N  G ! " + ANSI_RESET);
         System.out.println(title);
     }
 
@@ -194,7 +209,7 @@ public class Main {
             }
             System.out.println();
         }
-        System.out.println(ANSI_YELLOW + "GENERATIONS: " + gens + " | DEATHS: " + deaths + " | BIRTHS: " + births );
+        System.out.println(ANSI_ORANGE + "GENERATIONS: " + gens + " | DEATHS: " + deaths + " | BIRTHS: " + births );
     }
     public static boolean arrayContains(int[] ary,int contains) {
         for (int j : ary) {
@@ -326,7 +341,7 @@ public class Main {
                 gameArray[9][14] = 1;
             }
             else if (id == 4) {
-                gameArray = new int[35][35]; // Create a 40x42 array
+                gameArray = new int[35][35]; // Create a 35x35 array
 
                 // Fill the array with the specified pattern
                     gameArray[12][8] = 0;
@@ -349,6 +364,19 @@ public class Main {
                     gameArray[15][10] = 0;
                     gameArray[15][11] = 0;
             }
+            else if (id == 5) {
+                gameArray = new int[40][32]; // Create a 40x32 array
+
+                gameArray[16][16] = 1;
+
+                gameArray[17][18] = 1;
+
+                gameArray[18][19] = 1;
+                gameArray[18][20] = 1;
+                gameArray[18][21] = 1;
+                gameArray[18][16] = 1;
+                gameArray[18][15] = 1;
+            }
         return gameArray;
     }
 
@@ -363,4 +391,33 @@ public class Main {
     public static int gens = 0;
     public static int deaths = 0;
     public static int births = 0;
+
+    public static int[] getBirthRules(int index) {
+        int[] birthRules = {3};
+        if (index == 1) {
+            birthRules = new int[] {1,3,5,7};
+        }
+        else if (index == 2) {
+            birthRules = new int[] {3,7};
+        }
+        else if (index == 3) {
+            birthRules = new int[] {4,5,6,7,6};
+        }
+
+        return birthRules;
+    }
+    public static int[] getSurviveRules(int index) {
+        int[] surviveRules = {3};
+        if (index == 1) {
+            surviveRules = new int[] {1,3,5,7};
+        }
+        else if (index == 2) {
+            surviveRules = new int[] {1,2,3,4};
+        }
+        else if (index == 3) {
+            surviveRules = new int[] {4,6,7,8};
+        }
+
+        return surviveRules;
+    }
 }
