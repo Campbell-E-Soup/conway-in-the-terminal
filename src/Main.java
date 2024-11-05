@@ -5,7 +5,6 @@ public class Main {
     //finals
         public static final String ANSI_RESET = "\u001B[0m";  // Reset color
         public static final String ANSI_GREEN = "\033[38;5;10m"; // Green text
-        public static final String ANSI_BLACK = "\u001B[30m"; // Black text
         public static final String ANSI_RED = "\u001B[31m";   // Red Text
         public static final String ANSI_BLUE = "\u001B[34m";  // Blue Text
         public static final String ANSI_ORANGE = "\033[38;5;214m";  // Orange Text
@@ -20,7 +19,7 @@ public class Main {
             int[][] gameSpace;
             int height;
             int width;
-            String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_GREEN+ "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
+            String[] tileState = {" ",ANSI_GREEN+ "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
         //ask for vars
             System.out.println(title);
             timeOut(200);
