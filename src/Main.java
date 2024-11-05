@@ -1,4 +1,3 @@
-import java.util.Dictionary;
 import java.util.Scanner;
 import java.util.Random;
 
@@ -9,8 +8,7 @@ public class Main {
         public static final String ANSI_BLACK = "\u001B[30m"; // Black text
         public static final String ANSI_RED = "\u001B[31m";   // Red Text
         public static final String ANSI_BLUE = "\u001B[34m";  // Blue Text
-        public static final String ANSI_YELLOW = "\033[93m";  // Blue Text
-        public static final String ANSI_ORANGE = "\033[38;5;214m";  // Blue Text
+        public static final String ANSI_ORANGE = "\033[38;5;214m";  // Orange Text
         public static final String ANSI_COMMENT = "\u001B[38;5;75m";
     public static void main(String[] args) {
         //init vars
@@ -20,8 +18,8 @@ public class Main {
             int[] surviveRules;
             int[] birthRules;
             int[][] gameSpace;
-            int height = 0;
-            int width = 0;
+            int height;
+            int width;
             String[] tileState = {ANSI_BLACK + "·" + ANSI_RESET,ANSI_GREEN+ "▀" + ANSI_RESET,ANSI_RED + "·" + ANSI_RESET};
         //ask for vars
             System.out.println(title);
@@ -91,7 +89,6 @@ public class Main {
                                     gameSpace[y][x] = rand.nextInt(2);
                                 }
                             }
-                            ;
                             System.out.print(tileState[gameSpace[y][x]] + " ");
                         }
                         System.out.println();
@@ -201,11 +198,10 @@ public class Main {
     }
     public static void drawGameSpace(int[][] gameSpace, String[] symbols) {
         int width = gameSpace[0].length;
-        int height = gameSpace.length;
         clearScreen();
-        for (int y = 0; y < height; y++) {
+        for (int[] ints : gameSpace) {
             for (int x = 0; x < width; x++) {
-                System.out.print(symbols[gameSpace[y][x]] + " ");
+                System.out.print(symbols[ints[x]] + " ");
             }
             System.out.println();
         }
