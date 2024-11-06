@@ -402,7 +402,7 @@ public class Main {
         return birthRules;
     }
     public static int[] getSurviveRules(int index) {
-        int[] surviveRules = {3};
+        int[] surviveRules = {2,3};
         if (index == 1) {
             surviveRules = new int[] {1,3,5,7};
         }
